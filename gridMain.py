@@ -11,6 +11,7 @@ TAILLE = 8 #Nombre de lignes et de colonnes de la grille
 TAILLE_CEL = 50 #Taille d'une cellule en pixels
 X_OFFSET = 100 # décallage gauche - min 30 pour afficher les références
 Y_OFFSET = 50 # décallage droite - min 30
+plateau = [[0 for i in range(TAILLE)] for j in range(TAILLE)]
 #------------------------------
 
 def show_cadres_textes():
@@ -86,13 +87,23 @@ def centre_cellules(col, li):
     
     centre = ((coins[0][0] + coins[1][0])//2, ((coins[0][1] + coins[2][1])//2))
     return centre
-    
+
+def update_plateau(plateau, li, col, placement_type):
+    if placement_type == "Cat":
+        plateau[col][li] = 1
+    elif placement_type == "Mouse":
+        plateau[col][li] = 2
+    else:
+        plateau[col][li] = 0
 #---Programme principal--------------
 
 if __name__ == "__main__":
 
     fltk.cree_fenetre(LARG, HAUT)
     fltk.repere(50) # Affichage d'un repère
+    Color = ["white", "red", "green", "blue", "yellow", "orange", "purple", "pink"]
+    case_type = ["Void", "Cat", "Mouse", Color]
+    placement_type = case_type[2]
     
     show_grid(TAILLE, TAILLE_CEL, X_OFFSET, Y_OFFSET)
     show_cadres_textes()
@@ -113,13 +124,17 @@ if __name__ == "__main__":
             if li is not None and col is not None:
                 radius = TAILLE*0.1
                 xc, yc = centre_cellules(li, col)
-                fltk.cercle(xc,yc, radius, remplissage="blue", tag="cercle")
+                if placement_type == "Cat":
+                    fltk.image(xc, yc, "images/cat.png", TAILLE_CEL+10, TAILLE_CEL,tag="cat")
+                    update_plateau(plateau, li, col, placement_type)
+                    print(plateau)
+                if placement_type == "Mouse":
+                    fltk.image(xc, yc, "images/mouse.png", TAILLE_CEL+10, TAILLE_CEL,tag="mouse")
+                    update_plateau(plateau, li, col, placement_type)
+                    print(plateau)
             
         elif typeEv == "Quitte":
-            fltk.ferme_fenetre()
-        elif typeEv == "ClicDroit":
-            fltk.efface("cercle")
-    
+            fltk.ferme_fenetre()    
 
     
     
