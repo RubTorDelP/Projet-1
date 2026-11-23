@@ -23,7 +23,7 @@ taille_ecran = (1600, 900)  # Taille de la fenêtre au départ (largeur, hauteur
 # Les données du jeu et les fonctions qui les modifient. Ne dessine rien, ne connaît aucun pixel.
 
 #--Variables-------------------
-taille = 3                  # Nombre de lignes et de colonnes de la grille
+taille = 5                  # Nombre de lignes et de colonnes de la grille
 
 # Grille du jeu : tableau de tableaux d'éléments.
 # Un élément = [couleur, image, info]
@@ -69,19 +69,6 @@ def clic_jeu(li, col):
     return f"Case ({li}, {col}) modifiée"
 
 
-def show_message(texte, couleur="black"):
-    """
-    entrée 1 : texte (str) message à afficher
-    entrée 2 : couleur (str) couleur du message
-
-    action : mémorise le message qui sera dessiné en bas de la console par dessine_console
-
-    sortie : aucune
-    """
-    global message_console
-    message_console = (texte, couleur)
-
-
 def execute_commande(ligne):
     """
     entrée 1 : ligne (str) commande tapée dans la console
@@ -119,11 +106,10 @@ def touche_console(touche):
 
     sortie : aucune
     """
-    global saisie
+    global saisie, message_console
     speciales = {"space": " ", "underscore": "_", "minus": "-", "period": "."}
     if touche == "Return":
-        texte, couleur = execute_commande(saisie)
-        show_message(texte, couleur)
+        message_console = execute_commande(saisie)   # (texte, couleur) affiché en bas de la console
         saisie = ""
     elif touche == "BackSpace":
         saisie = saisie[:-1]
@@ -716,7 +702,7 @@ if __name__ == "__main__":
                     couleur_choisie = None if couleur_choisie == couleur else couleur
                 redessine()
             elif zone == "jeu" and case is not None:
-                show_message(clic_jeu(*case))
+                message_console = (clic_jeu(*case), "black")  # affiché en bas de la console
                 redessine()
 
         if typeEv == "Touche" and console_choisie:   # clavier : seulement si la console est sélectionnée
