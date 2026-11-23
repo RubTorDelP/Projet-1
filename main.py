@@ -11,6 +11,7 @@
 import fltk
 from constant import (LARG, HAUT, BACKGROUND_COLOR, CONSOLE_COLOR, ZONE_JEU, ZONE_SELECTION,
                       ZONE_CONSOLE, AFFICHE_REPERE, COULEURS)
+from gridMain import TAILLE_CEL
 
 taille_ecran = (1600, 900)  # Taille de la fenêtre au départ (largeur, hauteur) en pixels réels
 
@@ -426,10 +427,18 @@ def dessine_element(li, col, element):
 
     #---Image : C ou S dans un rond blanc
     if image is not None:
-        xe, ye = vers_ecran(xc, yc)
-        r = taille_cel * 0.3 * echelle()
-        fltk.cercle(xe, ye, r, couleur="black", remplissage="white", epaisseur=max(1, 2 * echelle()))
-        fltk.texte(xe, ye, image.upper(), taille=taille_police(taille_cel * 0.3), ancrage="center")
+        print(image)
+        if image == "c":
+            xe, ye = vers_ecran(xc, yc)
+            r = taille_cel * 0.3 * echelle()
+            fltk.image(xc, yc, "images/cat.png", 100, 100,tag="cat")
+
+        if image == "s":
+            xe, ye = vers_ecran(xc, yc)
+            r = taille_cel * 0.3 * echelle()
+            fltk.image(xc, yc, "images/mouse.png", 100, 100,tag="mouse")
+
+                
 
     #---Info : petit cercle dans le coin haut-gauche
     if info is not None:
@@ -510,7 +519,12 @@ def dessine_zone_selection():
         #---1re colonne : symbole
         ax, ay, bx, by = case_grille(x0, y0, x1, y1, 3, li, 0)
         xe, ye = vers_ecran((ax + bx) / 2, (ay + by) / 2)
-        fltk.texte(xe, ye, selection_symboles[li], taille=taille_police(t * 0.4), ancrage="center")
+        if selection_symboles[li] == "X":
+            fltk.texte(xe, ye, selection_symboles[li], taille=taille_police(t * 0.4), ancrage="center")
+        elif selection_symboles[li] == "S":
+            fltk.image(xe, ye, "images/mouse.png", 100, 100,tag="mouse")
+        elif selection_symboles[li] == "C":
+            fltk.image(xe, ye, "images/cat.png", 100, 100,tag="cat")
 
         #---2 autres colonnes : couleurs
         for col in range(1, 3):
