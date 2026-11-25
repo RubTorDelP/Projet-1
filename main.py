@@ -81,6 +81,27 @@ def affiche_texte(x, y, texte, taille, couleur="black"):
     fltk.texte(xe, ye, texte, couleur=couleur, taille=max(1, int(taille * echelle)))
 
 
+
+def affiche_plateau(plateau, x0, y0, x1, y1):
+    """
+    affiche l'image du chat ou de la souris dans chaque case du plateau qui en contient un
+    """
+    images = {1: "images/cat.png", 2: "images/mouse.png"}
+    nombre = len(plateau)
+    for li in range(nombre):
+        for col in range(nombre):
+            if plateau[li][col] in images:
+                affiche_image(*coins_case(li, col, x0, y0, x1, y1, nombre), images[plateau[li][col]])
+
+
+
+
+#----------------------------------------------------------------------
+#----------------------------Manipulation------------------------------
+#----------------------------------------------------------------------
+
+
+
 def case_de(x, y, x0, y0, x1, y1, nombre):
     """
     renvoie la case (li, col) de la grille qui contient le point virtuel (x, y),
@@ -110,25 +131,8 @@ def coins_case(li, col, x0, y0, x1, y1, nombre):
     return gx + col * t, gy + li * t, gx + (col + 1) * t, gy + (li + 1) * t
 
 
-def affiche_plateau(plateau, x0, y0, x1, y1):
-    """
-    affiche l'image du chat ou de la souris dans chaque case du plateau qui en contient un
-    """
-    images = {1: "images/cat.png", 2: "images/mouse.png"}
-    nombre = len(plateau)
-    for li in range(nombre):
-        for col in range(nombre):
-            if plateau[li][col] in images:
-                affiche_image(*coins_case(li, col, x0, y0, x1, y1, nombre), images[plateau[li][col]])
 
 
-
-
-#----------------------------------------------------------------------
-#----------------------------Manipulation------------------------------
-#----------------------------------------------------------------------
-
-#manip du jeu
 
 def modifie_plateau(plateau, li, col, type_placement):
     """
