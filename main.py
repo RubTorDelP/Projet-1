@@ -24,8 +24,12 @@ echelle = 1
 origine = (0, 0)     
 
 taille = 5                        # nombre de cases par ligne du plateau
-zone_plateau = (100, 50, 900, 850)  # (x0, y0, x1, y1) du plateau, en coordonnées virtuelles
-plateau = [[0 for col in range(taille)] for li in range(taille)]  # 0 = vide, 1 = chat, 2 = souris
+zone_plateau = (100, 50, 900, 850)
+zone_plateau_selec = (1100, 50, 1600, 500)  # (x0, y0, x1, y1) du plateau, en coordonnées virtuelles
+plateau = [[0 for col in range(taille)] for li in range(taille)]
+plateau_selec = [[0 for col in range(3)] for li in range(3)]
+plateau_selec[0][0] = 1
+plateau_selec[1][0] = 2
 type_placement = "Chat"           # ce que le clic pose : "Chat", "Souris" ou "Vide"
 
 
@@ -131,7 +135,22 @@ def coins_case(li, col, x0, y0, x1, y1, nombre):
     return gx + col * t, gy + li * t, gx + (col + 1) * t, gy + (li + 1) * t
 
 
-
+def chosir_type_placement(x, y):
+    """
+    action : change la variable globale type_placement selon le clic dans le plateau de sélection
+    """
+    global type_placement
+    case = case_de(x, y, *zone_plateau_selec, 3)
+    if case is not None:
+        li, col = case
+        if plateau_selec[li][col] == 1:
+            type_placement = "Chat"
+            print("Chat")
+        elif plateau_selec[li][col] == 2:
+            type_placement = "Souris"
+            print("Souris")
+        else:
+            type_placement = "Vide"
 
 
 def modifie_plateau(plateau, li, col, type_placement):
@@ -162,13 +181,39 @@ def dessine_tout():
     fltk.efface_tout()
     fltk.rectangle(0, 0, fltk.largeur_fenetre(), fltk.hauteur_fenetre(),couleur="#D3D3D3", remplissage="#D3D3D3")
     affiche_grille(*zone_plateau, taille)
+    affiche_grille(*zone_plateau_selec, 3) 
 
     #---Images du plateau : chat ou souris dans chaque case qui en contient un
-    images = {1: "images/chat.png", 2: "images/souris.png"}
+    images = {1: "images/cat.png", 2: "images/mouse.png"}
     for li in range(taille):
         for col in range(taille):
             if plateau[li][col] in images:
                 affiche_image(*coins_case(li, col, *zone_plateau, taille), images[plateau[li][col]])
+
+        #---Images du plateau de sélection
+
+    for li in range(3):
+        for col in range(3):
+            if li == 0:
+                couleur = "red"
+            elif li == 1:
+                 couleur = "blue"
+            else:
+                couleur = "#D3D3D3"
+            
+            ax, ay, bx, by = coins_case(li, col, *zone_plateau_selec, 3)
+            
+            ax, ay = vers_ecran(ax, ay)
+            bx, by = vers_ecran(bx, by)
+            
+            fltk.rectangle(ax, ay, bx, by, remplissage=couleur)
+            
+            if plateau_selec[li][col] in images:
+                affiche_image(
+                    *coins_case(li, col, *zone_plateau_selec, 3),
+                    images[plateau_selec[li][col]]
+                )
+            
 
     fltk.mise_a_jour()
 
@@ -199,11 +244,21 @@ if __name__ == "__main__":
 
 
 
-        elif typeEv == "ClicGauche":           
+        elif typeEv == "ClicGauche":
             x, y = vers_virtuel(fltk.abscisse(ev), fltk.ordonnee(ev))
+
+            # Clic dans le plateau de sélection
+            case = case_de(x, y, *zone_plateau_selec, 3)
+
+            if case is not None:
+                chosir_type_placement(x, y)
+
+            # Clic dans le plateau principal
             case = case_de(x, y, *zone_plateau, taille)
-            if case is not None:                       # clic dans le plateau
+
+            if case is not None:
                 li, col = case
                 modifie_plateau(plateau, li, col, type_placement)
-                dessine_tout()
+
+            dessine_tout()
     fltk.ferme_fenetre()
