@@ -209,12 +209,19 @@ def reset():
 #----------------------------------------------------------------------
 def verif_plateau(plateau):
     """
+    Pas de case sans couleur (None)
     Pas deux chats sur une meme ligne ou colonne
     Pas deux souris sur une meme ligne ou colonne
     entree : le plateau (liste de listes de (type_piece, couleur))
-    sortie : True si le plateau respecte la regle, False sinon
+    sortie : True si le plateau respecte les regles, False sinon
     """
     n = len(plateau)
+
+   # Verification des cases sans couleur
+    for li in range(n):
+        for col in range(n):
+            if plateau[li][col][1] is None:
+                return False
 
     for piece in (1, 2):  # 1 = chat, 2 = souris
         for i in range(n):
@@ -224,8 +231,10 @@ def verif_plateau(plateau):
             if nb_ligne > 1 or nb_colonne > 1:
                 return False
 
-    return True
+            
 
+
+    return True
 
 def case_de(x, y, x0, y0, x1, y1, nombre):
 
