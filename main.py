@@ -387,7 +387,12 @@ def execution_commande(txt):
         commande_retour_couleur = "black"
 
     elif commande[0] == "verifier":
-        pass
+        if verif_plateau(plateau):
+            commande_retour = "plateau valide!"
+            commande_retour_couleur = "green"
+        else:
+            commande_retour = "plateau invalide!"
+            commande_retour_couleur = "red"
 
 
     elif commande[0] == "aide":
