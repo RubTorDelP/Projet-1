@@ -146,7 +146,7 @@ def affiche_plateau(plateau, x0, y0, x1, y1):
                     images[type_piece]
                 )
 #----------------------------------------------------------------------
-#------------------------Sauvgarder et charger-------------------------
+#------------------------sauvegarder et charger-------------------------
 #----------------------------------------------------------------------
 def sauvegarde(cle,val):
     '''
@@ -341,26 +341,31 @@ def execution_commande(txt):
                 commande_retour_couleur = "red"
 
 
-    elif commande[0] == "sauvgarder":
+    elif commande[0] == "sauvegarder":
         if len(commande) == 1:
             commande_retour = "Error: veuiller entre un nom pour le plateau"
             commande_retour_couleur = "red"
         else:
             sauvegarde(commande[1], plateau)
-            commande_retour = "sauvrgarder :" + commande[1] + " avec succes"
+            commande_retour = "sauvegarder :" + commande[1] + " avec succes"
             commande_retour_couleur = "green"
 
     elif commande[0] == "nouvelle":
         if len(commande) == 1 or not(commande[1].isdigit()) or int(commande[1]) == 0:
             plateau = [[(0, None) for col in range(taille)] for li in range(taille)]
+            commande_retour = "nouvelle carte de taille : " + str(taille)
         else:
             taille = int(commande[1])
             plateau = [[(0, None) for col in range(taille)] for li in range(taille)]
+            commande_retour = "nouvelle carte de taille : " + str(taille)
+            commande_retour_couleur = "green"
 
     elif commande[0] == "resetall":
         reset()
         taille = 5
         plateau = [[(0, None) for col in range(taille)] for li in range(taille)]
+        commande_retour = "le fichier de sauvgarder a ete reinstialise "
+        commande_retour_couleur = "black"
 
     elif commande[0] == "verifier":
         pass
@@ -369,7 +374,7 @@ def execution_commande(txt):
     elif commande[0] == "aide":
         commande_retour_couleur = "black"
         commande_retour = "charger <nom>|sauvegarder <nom>|nouvelle [n]|verifier|aide|resetall"
-        print("aiderrr")
+        
 
 
     else:
