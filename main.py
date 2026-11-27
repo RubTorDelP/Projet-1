@@ -4,7 +4,7 @@
 #----------------------------------------------------------------------
 
 import fltk
-
+import pickle
 
 #----------------------------------------------------------------------
 #------------------------------Constantes-------------------------------
@@ -28,12 +28,14 @@ taille = 5
 
 zone_plateau = (100, 50, 900, 850)
 zone_plateau_selec = (1100, 50, 1600, 500)
+zone_commande = (975, 550, 1550, 850)
+
 
 # Chaque case contient (type_piece, couleur)
 # 0 = vide, 1 = chat, 2 = souris
 
 plateau = [[(0, None) for col in range(taille)] for li in range(taille)]
-
+#plateau = [ [(0, "magenta"), (2, "red"), (0, "yellow"), (1, "yellow"), (0, "green")], [(2, "magenta"), (0, "blue"), (0, "yellow"), (0, "blue"), (1, "green")], [(0, "red"), (1, "blue"), (0, "red"), (0, "yellow"), (2, "yellow")], [(1, "magenta"), (0, "blue"), (2, "green"), (0, "magenta"), (0, "green")], [(0, "green"), (0, "red"), (1, "red"), (2, "blue"), (0, "magenta")], ]
 plateau_selec = [[(0, None) for col in range(3)] for li in range(3)]
 
 plateau_selec[0][0] = (1, "red")
@@ -41,6 +43,12 @@ plateau_selec[1][0] = (2, "blue")
 
 type_placement = "Chat"
 couleur_placement = None
+
+
+#commande
+commande = ""
+commande_retour = ""
+commande_retour_couleur = "black"
 
 
 #----------------------------------------------------------------------
@@ -137,10 +145,67 @@ def affiche_plateau(plateau, x0, y0, x1, y1):
                     *coins_case(li, col, x0, y0, x1, y1, nombre),
                     images[type_piece]
                 )
+#----------------------------------------------------------------------
+#------------------------Sauvgarder et charger-------------------------
+#----------------------------------------------------------------------
+def sauvegarde(cle,val):
+    '''
+    meme propriete que un dico mais non supprimer lors de la fin du programme
+    entre : prend une cle et une donnée
+    sortie: modifie le dico
+    '''
+
+
+    import pickle
+    try:
+        with open("data", "rb") as fichier:
+            dico = pickle.load(fichier)
+    except:
+        reset()
+        with open("data", "rb") as fichier:
+            dico = pickle.load(fichier)
+
+    dico[cle] = val
+    with open("data", "wb") as fichier:
+        pickle.dump(dico, fichier)
+
+
+def charge(cle):
+    """
+    meme propriete que un dico mais non supprimer lors de la fin du programme
+    entre: prend une cle
+    sortie: retourne la valeur de la cle
+    """
+    import pickle
+    with open("data", "rb") as fichier:
+        dico = pickle.load(fichier)
+    
+    return dico[cle]
+
+
+
+def charge_tout():
+    """ 
+    meme propriete que un dico mais non supprimer lors de la fin du programme
+    sortie: le dico entier
+    """
+    import pickle
+    with open("data", "rb") as fichier:
+        dico = pickle.load(fichier)
+    return dico
+
+def reset():
+    """
+    meme propriete que un dico mais non supprimer lors de la fin du programme
+    sortie: rend le dico vide
+    """
+    import pickle
+    with open("data", "wb") as fichier:
+        pickle.dump({}, fichier)
 
 
 #----------------------------------------------------------------------
-#----------------------------Manipulation-------------------------------
+#----------------------------Manipulation------------------------------
 #----------------------------------------------------------------------
 
 def case_de(x, y, x0, y0, x1, y1, nombre):
@@ -186,32 +251,36 @@ def chosir_type_placement(x, y):
 
         li, col = case
 
+        # Colonne 0 : type de pièce
         if col == 0 and li == 0:
             type_placement = "Chat"
 
         elif col == 0 and li == 1:
             type_placement = "Souris"
 
-        elif col == 1 and li == 0:
-            couleur_placement = "red"
-
-        elif col == 1 and li == 1:
-            couleur_placement = "blue"
-
-        # Troisième colonne : cases colorées vides
-        elif col == 2 and li == 0:
-            type_placement = "Vide"
-            couleur_placement = "red"
-
-        elif col == 2 and li == 1:
-            type_placement = "Vide"
-            couleur_placement = "blue"
-
-        # Dernière ligne : case vide sans couleur
-        elif li == 2:
+        elif col == 0 and li == 2:
             type_placement = "Vide"
             couleur_placement = None
 
+        # Colonnes 1 et 2 : les 5 couleurs
+        elif col == 1 and li == 0:
+            couleur_placement = "red"
+
+        elif col == 2 and li == 0:
+            couleur_placement = "blue"
+
+        elif col == 1 and li == 1:
+            couleur_placement = "green"
+
+        elif col == 2 and li == 1:
+            couleur_placement = "yellow"
+
+        elif col == 1 and li == 2:
+            couleur_placement = None
+
+        # Dernière case : pas de couleur
+        elif col == 2 and li == 2:
+            couleur_placement = "magenta"
 
 
 def modifie_plateau(plateau, li, col, type_placement):
@@ -224,6 +293,90 @@ def modifie_plateau(plateau, li, col, type_placement):
 
     elif type_placement == "Vide":
         plateau[li][col] = (0, couleur_placement)
+
+
+
+def touche_commande(touche):
+    """
+    ajoute la touche à la commande, Retour arrière efface, Entrée affiche la commande dans la console puis la vide
+    """
+    global commande
+    if touche == "Return":
+        execution_commande(commande)
+        print("commande :", commande)
+        commande = ""
+    elif touche == "BackSpace":
+        commande = commande[:-1]
+    elif touche == "space":
+        commande = commande + " "
+    elif len(touche) == 1:
+        commande = commande + touche
+
+
+
+def execution_commande(txt):
+    """
+    execute la commande 
+    """
+
+    global plateau, taille, commande_retour, commande_retour_couleur
+
+    commande = txt.split()
+
+    if not commande:                                  
+        return
+
+    if commande[0] == "charger":
+        if len(commande) == 1:
+            commande_retour = "Error: veuiller entre un nom pour le plateau a charger"
+            commande_retour_couleur = "red"
+        else:
+            try:
+                plateau = charge(commande[1])
+                taille = len(plateau)
+                commande_retour = "charger :" + commande[1] + " avec succes"
+                commande_retour_couleur = "green"
+            except (FileNotFoundError, KeyError):
+                commande_retour = "Error: plateau introuvable : " + commande[1]
+                commande_retour_couleur = "red"
+
+
+    elif commande[0] == "sauvgarder":
+        if len(commande) == 1:
+            commande_retour = "Error: veuiller entre un nom pour le plateau"
+            commande_retour_couleur = "red"
+        else:
+            sauvegarde(commande[1], plateau)
+            commande_retour = "sauvrgarder :" + commande[1] + " avec succes"
+            commande_retour_couleur = "green"
+
+    elif commande[0] == "nouvelle":
+        if len(commande) == 1 or not(commande[1].isdigit()) or int(commande[1]) == 0:
+            plateau = [[(0, None) for col in range(taille)] for li in range(taille)]
+        else:
+            taille = int(commande[1])
+            plateau = [[(0, None) for col in range(taille)] for li in range(taille)]
+
+    elif commande[0] == "resetall":
+        reset()
+        taille = 5
+        plateau = [[(0, None) for col in range(taille)] for li in range(taille)]
+
+    elif commande[0] == "verifier":
+        pass
+
+
+    elif commande[0] == "aide":
+        commande_retour_couleur = "black"
+        commande_retour = "charger <nom>|sauvegarder <nom>|nouvelle [n]|verifier|aide|resetall"
+        print("aiderrr")
+
+
+    else:
+        commande_retour_couleur = "red"
+        commande_retour = "commande inconnue: " + commande[0]
+
+
 
 #----------------------------------------------------------------------
 #----------------------------Dessine tout-------------------------------
@@ -295,15 +448,25 @@ def dessine_tout():
             couleur_fond = "#D3D3D3"
 
             # Dernière ligne blanche
-            if li == 2:
+            if li == 2 and (col == 1 or col == 0):
                 couleur_fond = "white"
 
             # Cases de couleur
             elif col == 1 and li == 0:
                 couleur_fond = "red"
+                
+
+            elif col == 2 and li == 0:
+                couleur_fond = "blue"
 
             elif col == 1 and li == 1:
-                couleur_fond = "blue"
+                couleur_fond = "green"
+
+            elif col == 2 and li == 1:
+                couleur_fond = "yellow"
+
+            elif col == 2 and li == 2:
+                couleur_fond = "magenta"
 
             fltk.rectangle(
                 ax_e, ay_e, bx_e, by_e,
@@ -346,6 +509,20 @@ def dessine_tout():
         ancrage="center"
     )
 
+    #zone de commande 
+    x0, y0 = vers_ecran(zone_commande[0], zone_commande[1])
+    x1, y1 = vers_ecran(zone_commande[2], zone_commande[3])
+    fltk.rectangle(x0, y0, x1, y1, couleur="black", remplissage="white")
+    affiche_texte(zone_commande[0] + 20, zone_commande[1] + 20, "> " + commande, 15)
+    
+    affiche_texte(zone_commande[0] + 20, zone_commande[1] + 50, commande_retour, 15,commande_retour_couleur)
+    
+
+
+
+
+
+
     fltk.mise_a_jour()
     
 #------------------------------------ ---------------------------------
@@ -371,7 +548,9 @@ if __name__ == "__main__":
             break
 
         elif typeEv == "Redimension":
-
+            #plateau = [ [(0, "magenta"), (2, "red"), (0, "yellow"), (1, "yellow"), (0, "green")], [(2, "magenta"), (0, "blue"), (0, "yellow"), (0, "blue"), (1, "green")], [(0, "red"), (1, "blue"), (0, "red"), (0, "yellow"), (2, "yellow")], [(1, "magenta"), (0, "blue"), (2, "green"), (0, "magenta"), (0, "green")], [(0, "green"), (0, "red"), (1, "red"), (2, "blue"), (0, "magenta")], ]
+            
+            print(plateau)
             echelle = min(
                 fltk.largeur_fenetre() / LARG,
                 fltk.hauteur_fenetre() / HAUT
@@ -422,7 +601,12 @@ if __name__ == "__main__":
                         col,
                         type_placement
                     )
+            dessine_tout()
 
+        elif typeEv == "Touche":
+            touche_commande(fltk.touche(ev))
+            
+            
             dessine_tout()
 
     fltk.ferme_fenetre()
