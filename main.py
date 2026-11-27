@@ -207,6 +207,25 @@ def reset():
 #----------------------------------------------------------------------
 #----------------------------Manipulation------------------------------
 #----------------------------------------------------------------------
+def verif_plateau(plateau):
+    """
+    Pas deux chats sur une meme ligne ou colonne
+    Pas deux souris sur une meme ligne ou colonne
+    entree : le plateau (liste de listes de (type_piece, couleur))
+    sortie : True si le plateau respecte la regle, False sinon
+    """
+    n = len(plateau)
+
+    for piece in (1, 2):  # 1 = chat, 2 = souris
+        for i in range(n):
+            nb_ligne = sum(1 for col in range(n) if plateau[i][col][0] == piece)
+            nb_colonne = sum(1 for li in range(n) if plateau[li][i][0] == piece)
+
+            if nb_ligne > 1 or nb_colonne > 1:
+                return False
+
+    return True
+
 
 def case_de(x, y, x0, y0, x1, y1, nombre):
 
